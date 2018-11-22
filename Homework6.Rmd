@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Homework 6"
 author: Bihui Sun
 output: github_document
 ---
@@ -8,19 +8,23 @@ output: github_document
 library(tidyverse)
 data=read_csv(file="C:/Users/lenovo/Desktop/p8105/data_import_examples/homicide-data.csv")
 data=data%>%
-  janitor::clean_names()%>%
-  unite("city_state",c("city","state"))%>%
+  mutate(city_state=str_c(city,state,sep=","))%>%
   mutate(ifsolved=ifelse(disposition=="Closed by arrest","solved","unsolved"))%>%
-  filter(!(city_state%in%c("Dallas_TX","Phoenix_AZ","Kansas City_MO","Tulsa_AL")))%>%
-  mutate(victim_age=as.numeric((victim_age)))%>%
+  filter(!(city_state%in%c("Dallas,TX","Phoenix,AZ","Kansas City,MO","Tulsa,AL")))%>%
+  mutate(victim_age=as.numeric(victim_age))%>%
   mutate(victim_race=ifelse(victim_race=="White","white","non-white"))%>%
+  mutate(victim_race=as.character(victim_race))%>%
+  mutate(victim_race=fct_relevel(victim_race,"white"))%>%
   mutate(ifsolved=as.numeric(ifsolved=="solved"))
 data  
 fit_logistic=data%>%
-  filter(city_state=="Baltimore_MD")%>%
-  glm(ifsolved ~ victim_age + victim_race + victim_sex, data = ., family = binomial())%>%
-  broom::tidy()
+  filter(city_state=="Baltimore,MD")%>%
+  glm(ifsolved ~ victim_age + victim_race + victim_sex, data = ., family = binomial())
+fit_logistic=broom::tidy(fit_logistic)%>%
+  mutate(OR=exp(estimate))
 fit_logistic
+
+
 
 
 ```
