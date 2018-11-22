@@ -78,34 +78,49 @@ data_Bal=data%>%
   filter(city_state=="Baltimore,MD")
 model=glm(ifsolved ~ victim_age + victim_race + victim_sex, data = data_Bal, family = binomial())
 fit_logistic=broom::tidy(model)
-fit_logistic
+fit_logistic%>%
+  mutate(OR=exp(estimate))%>%
+  mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
+  mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))
 ```
 
-    ## # A tibble: 4 x 5
-    ##   term                 estimate std.error statistic  p.value
-    ##   <chr>                   <dbl>     <dbl>     <dbl>    <dbl>
-    ## 1 (Intercept)           1.19      0.235        5.06 4.30e- 7
-    ## 2 victim_age           -0.00699   0.00326     -2.14 3.22e- 2
-    ## 3 victim_racenon-white -0.820     0.175       -4.69 2.68e- 6
-    ## 4 victim_sexMale       -0.888     0.136       -6.53 6.80e-11
+    ## # A tibble: 4 x 8
+    ##   term         estimate std.error statistic  p.value    OR upperCI lowerCI
+    ##   <chr>           <dbl>     <dbl>     <dbl>    <dbl> <dbl>   <dbl>   <dbl>
+    ## 1 (Intercept)   1.19      0.235        5.06 4.30e- 7 3.27    5.19    2.07 
+    ## 2 victim_age   -0.00699   0.00326     -2.14 3.22e- 2 0.993   0.999   0.987
+    ## 3 victim_race~ -0.820     0.175       -4.69 2.68e- 6 0.441   0.620   0.313
+    ## 4 victim_sexM~ -0.888     0.136       -6.53 6.80e-11 0.412   0.537   0.315
 
 ``` r
-exp(coef(model))
+allcity=data%>%
+  select(city_state,ifsolved,victim_age,victim_race,victim_sex)%>%
+  group_by(city_state)%>%
+  nest()
+newmodel=map(allcity$data,~glm(ifsolved ~ victim_age + victim_race + victim_sex, data= .x,family = binomial()))
+allcity=allcity%>%
+  mutate(newmodel)%>%
+  mutate(result=map(newmodel,broom::tidy))%>%
+  select(city_state,result)%>%
+  unnest()%>%
+  mutate(city_OR=exp(estimate))%>%
+  mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
+  mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))%>%
+  select(city_state,term,city_OR,upperCI,lowerCI)
+allcity
 ```
 
-    ##          (Intercept)           victim_age victim_racenon-white 
-    ##            3.2740589            0.9930344            0.4406080 
-    ##       victim_sexMale 
-    ##            0.4115656
-
-``` r
-exp(confint(model))
-```
-
-    ## Waiting for profiling to be done...
-
-    ##                          2.5 %    97.5 %
-    ## (Intercept)          2.0759841 5.2121977
-    ## victim_age           0.9866654 0.9993728
-    ## victim_racenon-white 0.3121625 0.6196693
-    ## victim_sexMale       0.3148182 0.5369411
+    ## # A tibble: 211 x 5
+    ##    city_state     term                 city_OR upperCI lowerCI
+    ##    <chr>          <chr>                  <dbl>   <dbl>   <dbl>
+    ##  1 Albuquerque,NM (Intercept)            3.43    7.27    1.62 
+    ##  2 Albuquerque,NM victim_age             0.977   0.991   0.964
+    ##  3 Albuquerque,NM victim_racenon-white   0.741   1.22    0.451
+    ##  4 Albuquerque,NM victim_sexMale         1.58    2.77    0.895
+    ##  5 Albuquerque,NM victim_sexUnknown      8.19   30.8     2.18 
+    ##  6 Atlanta,GA     (Intercept)            3.17    6.43    1.56 
+    ##  7 Atlanta,GA     victim_age             0.988   0.997   0.979
+    ##  8 Atlanta,GA     victim_racenon-white   0.753   1.31    0.432
+    ##  9 Atlanta,GA     victim_sexMale         0.990   1.44    0.679
+    ## 10 Baltimore,MD   (Intercept)            3.27    5.19    2.07 
+    ## # ... with 201 more rows

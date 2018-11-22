@@ -21,10 +21,26 @@ data_Bal=data%>%
   filter(city_state=="Baltimore,MD")
 model=glm(ifsolved ~ victim_age + victim_race + victim_sex, data = data_Bal, family = binomial())
 fit_logistic=broom::tidy(model)
-fit_logistic
-exp(coef(model))
-exp(confint(model))
+fit_logistic%>%
+  mutate(OR=exp(estimate))%>%
+  mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
+  mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))
 
+allcity=data%>%
+  select(city_state,ifsolved,victim_age,victim_race,victim_sex)%>%
+  group_by(city_state)%>%
+  nest()
+newmodel=map(allcity$data,~glm(ifsolved ~ victim_age + victim_race + victim_sex, data= .x,family = binomial()))
+allcity=allcity%>%
+  mutate(newmodel)%>%
+  mutate(result=map(newmodel,broom::tidy))%>%
+  select(city_state,result)%>%
+  unnest()%>%
+  mutate(city_OR=exp(estimate))%>%
+  mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
+  mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))%>%
+  select(city_state,term,city_OR,upperCI,lowerCI)
+allcity
 
 
 
