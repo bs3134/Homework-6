@@ -74,18 +74,38 @@ data
     ## #   city_state <chr>, ifsolved <dbl>
 
 ``` r
-fit_logistic=data%>%
-  filter(city_state=="Baltimore,MD")%>%
-  glm(ifsolved ~ victim_age + victim_race + victim_sex, data = ., family = binomial())
-fit_logistic=broom::tidy(fit_logistic)%>%
-  mutate(OR=exp(estimate))
+data_Bal=data%>%
+  filter(city_state=="Baltimore,MD")
+model=glm(ifsolved ~ victim_age + victim_race + victim_sex, data = data_Bal, family = binomial())
+fit_logistic=broom::tidy(model)
 fit_logistic
 ```
 
-    ## # A tibble: 4 x 6
-    ##   term                 estimate std.error statistic  p.value    OR
-    ##   <chr>                   <dbl>     <dbl>     <dbl>    <dbl> <dbl>
-    ## 1 (Intercept)           1.19      0.235        5.06 4.30e- 7 3.27 
-    ## 2 victim_age           -0.00699   0.00326     -2.14 3.22e- 2 0.993
-    ## 3 victim_racenon-white -0.820     0.175       -4.69 2.68e- 6 0.441
-    ## 4 victim_sexMale       -0.888     0.136       -6.53 6.80e-11 0.412
+    ## # A tibble: 4 x 5
+    ##   term                 estimate std.error statistic  p.value
+    ##   <chr>                   <dbl>     <dbl>     <dbl>    <dbl>
+    ## 1 (Intercept)           1.19      0.235        5.06 4.30e- 7
+    ## 2 victim_age           -0.00699   0.00326     -2.14 3.22e- 2
+    ## 3 victim_racenon-white -0.820     0.175       -4.69 2.68e- 6
+    ## 4 victim_sexMale       -0.888     0.136       -6.53 6.80e-11
+
+``` r
+exp(coef(model))
+```
+
+    ##          (Intercept)           victim_age victim_racenon-white 
+    ##            3.2740589            0.9930344            0.4406080 
+    ##       victim_sexMale 
+    ##            0.4115656
+
+``` r
+exp(confint(model))
+```
+
+    ## Waiting for profiling to be done...
+
+    ##                          2.5 %    97.5 %
+    ## (Intercept)          2.0759841 5.2121977
+    ## victim_age           0.9866654 0.9993728
+    ## victim_racenon-white 0.3121625 0.6196693
+    ## victim_sexMale       0.3148182 0.5369411
