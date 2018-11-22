@@ -1,5 +1,6 @@
 ---
 title: "Untitled"
+author: Bihui Sun
 output: github_document
 ---
 
@@ -10,9 +11,16 @@ data=data%>%
   janitor::clean_names()%>%
   unite("city_state",c("city","state"))%>%
   mutate(ifsolved=ifelse(disposition=="Closed by arrest","solved","unsolved"))%>%
-  filter(!(city_state%in%c("Dallas_TX","Phoenix_AZ","Kansas City_MO","Tulsa_AL")))
-  
-
+  filter(!(city_state%in%c("Dallas_TX","Phoenix_AZ","Kansas City_MO","Tulsa_AL")))%>%
+  mutate(victim_age=as.numeric((victim_age)))%>%
+  mutate(victim_race=ifelse(victim_race=="White","white","non-white"))%>%
+  mutate(ifsolved=as.numeric(ifsolved=="solved"))
+data  
+fit_logistic=data%>%
+  filter(city_state=="Baltimore_MD")%>%
+  glm(ifsolved ~ victim_age + victim_race + victim_sex, data = ., family = binomial())%>%
+  broom::tidy()
+fit_logistic
 
 
 ```
