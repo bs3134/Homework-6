@@ -29,10 +29,8 @@ fit_logistic%>%
 allcity=data%>%
   select(city_state,ifsolved,victim_age,victim_race,victim_sex)%>%
   group_by(city_state)%>%
-  nest()
-newmodel=map(allcity$data,~glm(ifsolved ~ victim_age + victim_race + victim_sex, data= .x,family = binomial()))
-allcity=allcity%>%
-  mutate(newmodel)%>%
+  nest()%>%
+  mutate(newmodel=map(data,~glm(ifsolved ~ victim_age + victim_race + victim_sex, data= .x,family = binomial())))%>%
   mutate(result=map(newmodel,broom::tidy))%>%
   select(city_state,result)%>%
   unnest()%>%
