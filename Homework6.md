@@ -125,6 +125,7 @@ allcity
 
 ``` r
 library(tidyverse)
+library(modelr)
 data=read_csv("C:/Users/lenovo/Desktop/p8105/data_import_examples/birthweight.csv")%>%
   mutate(babysex=as.factor(babysex))%>%
   mutate(frace=as.factor(frace))%>%
@@ -326,7 +327,7 @@ step(lm(bwt~babysex+bhead+blength+delwt+fincome+frace+gaweeks+malform+menarche+m
     ##    -100.678       96.305       -2.676       -4.843
 
 ``` r
-fit=lm(bwt ~ babysex + bhead + blength + delwt + fincome +gaweeks + mheight + mrace + parity + ppwt + smoken, data = data)
+fit=lm(bwt~babysex+bhead+blength+delwt+fincome+gaweeks+mheight+mrace+parity+ppwt+smoken, data = data)
 summary(fit)
 ```
 
@@ -362,4 +363,82 @@ summary(fit)
     ## Multiple R-squared:  0.7181, Adjusted R-squared:  0.7173 
     ## F-statistic: 848.1 on 13 and 4328 DF,  p-value: < 2.2e-16
 
--   The model building process I choose is stepwise approaches, and the predictors I choose are babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken
+``` r
+data %>% 
+  select(bwt,babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken)%>%
+  add_residuals(fit) %>% 
+  add_predictions(fit)
+```
+
+    ## # A tibble: 4,342 x 14
+    ##      bwt babysex bhead blength delwt fincome gaweeks mheight mrace parity
+    ##    <int> <fct>   <int>   <int> <int>   <int>   <dbl>   <int> <fct>  <int>
+    ##  1  3629 2          34      51   177      35    39.9      63 1          3
+    ##  2  3062 1          34      48   156      65    25.9      65 2          0
+    ##  3  3345 2          36      50   148      85    39.9      64 1          0
+    ##  4  3062 1          34      52   157      55    40        64 1          0
+    ##  5  3374 2          34      52   156       5    41.6      66 1          0
+    ##  6  3374 1          33      52   129      55    40.7      66 1          0
+    ##  7  2523 2          33      46   126      96    40.3      72 2          0
+    ##  8  2778 2          33      49   140       5    37.4      62 1          0
+    ##  9  3515 1          36      52   146      85    40.3      61 1          0
+    ## 10  3459 1          33      50   169      75    40.7      64 2          0
+    ## # ... with 4,332 more rows, and 4 more variables: ppwt <int>,
+    ## #   smoken <dbl>, resid <dbl>, pred <dbl>
+
+``` r
+fit1=lm(bwt~blength+gaweeks,data=data)
+fit2=lm(bwt~bhead+blength+babysex+bhead*blength+bhead*babysex+blength*babysex+bhead*babysex*blength,data=data)
+
+cv_df =
+  crossv_mc(data, 100) %>% 
+  mutate(train = map(train, as_tibble),
+         test = map(test, as_tibble))%>%
+  mutate(mod1 = map(train, ~lm(bwt~babysex+bhead+blength+delwt+fincome+gaweeks+mheight+mrace+parity+ppwt+smoken, data = .x)),
+         mod2 = map(train, ~lm(bwt ~ blength+gaweeks, data = .x)),
+         mod3 = map(train, ~lm(bwt~bhead+blength+babysex+bhead*blength+bhead*babysex+blength*babysex+bhead*babysex*blength,data=.x))) %>% 
+  mutate(rmse_mod1 = map2_dbl(mod1, test, ~rmse(model = .x, data = .y)),
+         rmse_mod2 = map2_dbl(mod2, test, ~rmse(model = .x, data = .y)),
+         rmse_mod3 = map2_dbl(mod3, test, ~rmse(model = .x, data = .y)))
+```
+
+    ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
+    ## may be misleading
+
+    ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
+    ## may be misleading
+
+    ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
+    ## may be misleading
+
+``` r
+cv_df
+```
+
+    ## # A tibble: 100 x 9
+    ##    train    test     .id   mod1  mod2  mod3  rmse_mod1 rmse_mod2 rmse_mod3
+    ##    <list>   <list>   <chr> <lis> <lis> <lis>     <dbl>     <dbl>     <dbl>
+    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      273.      322.      288.
+    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      277.      328.      287.
+    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      270.      333.      284.
+    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      297.      376.      318.
+    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      263.      317.      279.
+    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      273.      308.      285.
+    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      285.      328.      290.
+    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      276.      330.      292.
+    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      276.      339.      293.
+    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      283.      339.      297.
+    ## # ... with 90 more rows
+
+``` r
+cv_df %>% 
+  select(starts_with("rmse")) %>% 
+  gather(key = model, value = rmse) %>% 
+  mutate(model = str_replace(model, "rmse_", ""),
+         model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + geom_violin()
+```
+
+![](Homework6_files/figure-markdown_github/problem2-1.png)
+
+-   The model building process I choose is stepwaise approaches, backward elimination, remove the variable with the greatest p-value one by one , and the predictors left are babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken.

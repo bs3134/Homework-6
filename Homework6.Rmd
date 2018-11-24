@@ -47,6 +47,7 @@ allcity
 
 ```{r problem2}
 library(tidyverse)
+library(modelr)
 data=read_csv("C:/Users/lenovo/Desktop/p8105/data_import_examples/birthweight.csv")%>%
   mutate(babysex=as.factor(babysex))%>%
   mutate(frace=as.factor(frace))%>%
@@ -55,9 +56,35 @@ data=read_csv("C:/Users/lenovo/Desktop/p8105/data_import_examples/birthweight.cs
 data=na.omit(data)
 data
 step(lm(bwt~babysex+bhead+blength+delwt+fincome+frace+gaweeks+malform+menarche+mheight+momage+mrace+parity+pnumlbw+pnumsga+ppbmi+ppwt+smoken+wtgain,data=data),direction="backward")
-fit=lm(bwt ~ babysex + bhead + blength + delwt + fincome +gaweeks + mheight + mrace + parity + ppwt + smoken, data = data)
+fit=lm(bwt~babysex+bhead+blength+delwt+fincome+gaweeks+mheight+mrace+parity+ppwt+smoken, data = data)
 summary(fit)
+data %>% 
+  select(bwt,babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken)%>%
+  add_residuals(fit) %>% 
+  add_predictions(fit)
 
+
+
+fit1=lm(bwt~blength+gaweeks,data=data)
+fit2=lm(bwt~bhead+blength+babysex+bhead*blength+bhead*babysex+blength*babysex+bhead*babysex*blength,data=data)
+
+cv_df =
+  crossv_mc(data, 100) %>% 
+  mutate(train = map(train, as_tibble),
+         test = map(test, as_tibble))%>%
+  mutate(mod1 = map(train, ~lm(bwt~babysex+bhead+blength+delwt+fincome+gaweeks+mheight+mrace+parity+ppwt+smoken, data = .x)),
+         mod2 = map(train, ~lm(bwt ~ blength+gaweeks, data = .x)),
+         mod3 = map(train, ~lm(bwt~bhead+blength+babysex+bhead*blength+bhead*babysex+blength*babysex+bhead*babysex*blength,data=.x))) %>% 
+  mutate(rmse_mod1 = map2_dbl(mod1, test, ~rmse(model = .x, data = .y)),
+         rmse_mod2 = map2_dbl(mod2, test, ~rmse(model = .x, data = .y)),
+         rmse_mod3 = map2_dbl(mod3, test, ~rmse(model = .x, data = .y)))
+cv_df
+cv_df %>% 
+  select(starts_with("rmse")) %>% 
+  gather(key = model, value = rmse) %>% 
+  mutate(model = str_replace(model, "rmse_", ""),
+         model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + geom_violin()
 ```
 
-* The model building process I choose is stepwise approaches, and the predictors I choose are babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken
+* The model building process I choose is stepwaise approaches, backward elimination, remove the variable with the greatest p-value one by one , and the predictors left are babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken.
