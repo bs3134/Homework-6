@@ -88,3 +88,4 @@ cv_df %>%
 ```
 
 * The model building process I choose is stepwaise approaches, backward elimination, remove the variable with the greatest p-value one by one , and the predictors left are babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken.
+From the rmse plot, we can see the first model is the one we want because it has lower rmse.
