@@ -54,4 +54,10 @@ data=read_csv("C:/Users/lenovo/Desktop/p8105/data_import_examples/birthweight.cs
   mutate(mrace=as.factor(mrace))
 data=na.omit(data)
 data
+step(lm(bwt~babysex+bhead+blength+delwt+fincome+frace+gaweeks+malform+menarche+mheight+momage+mrace+parity+pnumlbw+pnumsga+ppbmi+ppwt+smoken+wtgain,data=data),direction="backward")
+fit=lm(bwt ~ babysex + bhead + blength + delwt + fincome +gaweeks + mheight + mrace + parity + ppwt + smoken, data = data)
+summary(fit)
+
 ```
+
+* The model building process I choose is stepwise approaches, and the predictors I choose are babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken
