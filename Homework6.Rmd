@@ -43,3 +43,15 @@ allcity
 
 
 ```
+
+
+```{r problem2}
+library(tidyverse)
+data=read_csv("C:/Users/lenovo/Desktop/p8105/data_import_examples/birthweight.csv")%>%
+  mutate(babysex=as.factor(babysex))%>%
+  mutate(frace=as.factor(frace))%>%
+  mutate(malform=as.factor(malform))%>%
+  mutate(mrace=as.factor(mrace))
+data=na.omit(data)
+data
+```

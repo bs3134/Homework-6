@@ -122,3 +122,44 @@ allcity
     ##  9 Atlanta,GA     victim_sexMale         0.990   1.44    0.679
     ## 10 Baltimore,MD   (Intercept)            3.27    5.19    2.07 
     ## # ... with 201 more rows
+
+``` r
+library(tidyverse)
+data=read_csv("C:/Users/lenovo/Desktop/p8105/data_import_examples/birthweight.csv")%>%
+  mutate(babysex=as.factor(babysex))%>%
+  mutate(frace=as.factor(frace))%>%
+  mutate(malform=as.factor(malform))%>%
+  mutate(mrace=as.factor(mrace))
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   .default = col_integer(),
+    ##   gaweeks = col_double(),
+    ##   ppbmi = col_double(),
+    ##   smoken = col_double()
+    ## )
+
+    ## See spec(...) for full column specifications.
+
+``` r
+data=na.omit(data)
+data
+```
+
+    ## # A tibble: 4,342 x 20
+    ##    babysex bhead blength   bwt delwt fincome frace gaweeks malform menarche
+    ##    <fct>   <int>   <int> <int> <int>   <int> <fct>   <dbl> <fct>      <int>
+    ##  1 2          34      51  3629   177      35 1        39.9 0             13
+    ##  2 1          34      48  3062   156      65 2        25.9 0             14
+    ##  3 2          36      50  3345   148      85 1        39.9 0             12
+    ##  4 1          34      52  3062   157      55 1        40   0             14
+    ##  5 2          34      52  3374   156       5 1        41.6 0             13
+    ##  6 1          33      52  3374   129      55 1        40.7 0             12
+    ##  7 2          33      46  2523   126      96 2        40.3 0             14
+    ##  8 2          33      49  2778   140       5 1        37.4 0             12
+    ##  9 1          36      52  3515   146      85 1        40.3 0             11
+    ## 10 1          33      50  3459   169      75 2        40.7 0             12
+    ## # ... with 4,332 more rows, and 10 more variables: mheight <int>,
+    ## #   momage <int>, mrace <fct>, parity <int>, pnumlbw <int>, pnumsga <int>,
+    ## #   ppbmi <dbl>, ppwt <int>, smoken <dbl>, wtgain <int>
