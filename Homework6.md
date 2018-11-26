@@ -377,11 +377,42 @@ summary(fit)
 
 ``` r
 data %>% 
-  select(bwt,babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken)%>%
-  add_residuals(fit) %>% 
-  add_predictions(fit)%>%
-  ggplot(aes(x=))
+  select(bwt,babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken)
 ```
+
+    ## # A tibble: 4,342 x 12
+    ##      bwt babysex bhead blength delwt fincome gaweeks mheight mrace parity
+    ##    <int> <fct>   <int>   <int> <int>   <int>   <dbl>   <int> <fct>  <int>
+    ##  1  3629 2          34      51   177      35    39.9      63 1          3
+    ##  2  3062 1          34      48   156      65    25.9      65 2          0
+    ##  3  3345 2          36      50   148      85    39.9      64 1          0
+    ##  4  3062 1          34      52   157      55    40        64 1          0
+    ##  5  3374 2          34      52   156       5    41.6      66 1          0
+    ##  6  3374 1          33      52   129      55    40.7      66 1          0
+    ##  7  2523 2          33      46   126      96    40.3      72 2          0
+    ##  8  2778 2          33      49   140       5    37.4      62 1          0
+    ##  9  3515 1          36      52   146      85    40.3      61 1          0
+    ## 10  3459 1          33      50   169      75    40.7      64 2          0
+    ## # ... with 4,332 more rows, and 2 more variables: ppwt <int>, smoken <dbl>
+
+``` r
+data %>% 
+  add_residuals(fit)%>%
+  
+  add_predictions(fit)%>%
+  gather(key = name, value = x, -bwt, -pred, -resid) %>%  
+  ggplot(aes(x = x, y = bwt)) +  
+  geom_segment(aes(xend = x, yend = pred), alpha = .2) +
+  geom_point(aes(color = resid)) +
+  scale_color_gradient2(low = "blue", mid = "white", high = "red") +
+  guides(color = FALSE) +
+  geom_point(aes(y = pred), shape = 1) +
+  facet_grid(~ name, scales = "free_x") + 
+  theme_bw()
+```
+
+    ## Warning: attributes are not identical across measure variables;
+    ## they will be dropped
 
 ![](Homework6_files/figure-markdown_github/problem2-1.png)
 
@@ -396,31 +427,22 @@ cv_df =
   mutate(rmse_mod1 = map2_dbl(mod1, test, ~rmse(model = .x, data = .y)),
          rmse_mod2 = map2_dbl(mod2, test, ~rmse(model = .x, data = .y)),
          rmse_mod3 = map2_dbl(mod3, test, ~rmse(model = .x, data = .y)))
-```
-
-    ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
-    ## may be misleading
-
-    ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
-    ## may be misleading
-
-``` r
 cv_df
 ```
 
     ## # A tibble: 100 x 9
     ##    train    test     .id   mod1  mod2  mod3  rmse_mod1 rmse_mod2 rmse_mod3
     ##    <list>   <list>   <chr> <lis> <lis> <lis>     <dbl>     <dbl>     <dbl>
-    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      277.      331.      291.
-    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      270.      345.      291.
-    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      276.      332.      287.
-    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      261.      325.      275.
-    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      273.      328.      289.
-    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      270.      331.      284.
-    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      278.      338.      292.
-    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      288.      359.      301.
-    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      262.      309.      278.
-    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      281.      334.      291.
+    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      288.      360.      308.
+    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      264.      321.      276.
+    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      277.      334.      296.
+    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      264.      328.      282.
+    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      264.      327.      279.
+    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      279.      350.      302.
+    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      264.      319.      282.
+    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      271.      327.      283.
+    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      272.      331.      294.
+    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      283.      345.      301.
     ## # ... with 90 more rows
 
 ``` r

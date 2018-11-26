@@ -66,13 +66,25 @@ step(lm(bwt~babysex+bhead+blength+delwt+fincome+frace+gaweeks+malform+menarche+m
 fit=lm(bwt~babysex+bhead+blength+delwt+fincome+gaweeks+mheight+mrace+parity+ppwt+smoken, data = data)
 summary(fit)
 data %>% 
-  select(bwt,babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken)%>%
-  add_residuals(fit) %>% 
+  select(bwt,babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken)
+
+  
+ 
+
+data %>% 
+  add_residuals(fit)%>%
+  
   add_predictions(fit)%>%
-  ggplot(aes(x=))
-
-
-
+  gather(key = name, value = x, -bwt, -pred, -resid) %>%  
+  ggplot(aes(x = x, y = bwt)) +  
+  geom_segment(aes(xend = x, yend = pred), alpha = .2) +
+  geom_point(aes(color = resid)) +
+  scale_color_gradient2(low = "blue", mid = "white", high = "red") +
+  guides(color = FALSE) +
+  geom_point(aes(y = pred), shape = 1) +
+  facet_grid(~ name, scales = "free_x") + 
+  theme_bw()
+  
 
 
 cv_df =
