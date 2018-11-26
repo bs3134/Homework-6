@@ -42,6 +42,7 @@ data=data%>%
   mutate(city_state=str_c(city,state,sep=","))%>%
   mutate(ifsolved=ifelse(disposition=="Closed by arrest","solved","unsolved"))%>%
   filter(!(city_state%in%c("Dallas,TX","Phoenix,AZ","Kansas City,MO","Tulsa,AL")))%>%
+  filter(!(victim_sex=="Unknown"))%>%
   mutate(victim_age=as.numeric(victim_age))%>%
   mutate(victim_race=ifelse(victim_race=="White","white","non-white"))%>%
   mutate(victim_race=as.character(victim_race))%>%
@@ -56,7 +57,7 @@ data=data%>%
 data  
 ```
 
-    ## # A tibble: 48,507 x 14
+    ## # A tibble: 47,947 x 14
     ##    uid   reported_date victim_last victim_first victim_race victim_age
     ##    <chr>         <int> <chr>       <chr>        <fct>            <dbl>
     ##  1 Alb-~      20100504 GARCIA      JUAN         non-white           78
@@ -69,7 +70,7 @@ data
     ##  8 Alb-~      20100127 MALDONADO   CONNIE       non-white           52
     ##  9 Alb-~      20100130 MARTIN-LEY~ GUSTAVO      white               56
     ## 10 Alb-~      20100210 HERRERA     ISRAEL       non-white           43
-    ## # ... with 48,497 more rows, and 8 more variables: victim_sex <chr>,
+    ## # ... with 47,937 more rows, and 8 more variables: victim_sex <chr>,
     ## #   city <chr>, state <chr>, lat <dbl>, lon <dbl>, disposition <chr>,
     ## #   city_state <chr>, ifsolved <dbl>
 
@@ -108,20 +109,31 @@ allcity=data%>%
 allcity
 ```
 
-    ## # A tibble: 211 x 5
+    ## # A tibble: 188 x 5
     ##    city_state     term                 city_OR upperCI lowerCI
     ##    <chr>          <chr>                  <dbl>   <dbl>   <dbl>
-    ##  1 Albuquerque,NM (Intercept)            3.43    7.27    1.62 
-    ##  2 Albuquerque,NM victim_age             0.977   0.991   0.964
-    ##  3 Albuquerque,NM victim_racenon-white   0.741   1.22    0.451
-    ##  4 Albuquerque,NM victim_sexMale         1.58    2.77    0.895
-    ##  5 Albuquerque,NM victim_sexUnknown      8.19   30.8     2.18 
-    ##  6 Atlanta,GA     (Intercept)            3.17    6.43    1.56 
-    ##  7 Atlanta,GA     victim_age             0.988   0.997   0.979
-    ##  8 Atlanta,GA     victim_racenon-white   0.753   1.31    0.432
-    ##  9 Atlanta,GA     victim_sexMale         0.990   1.44    0.679
-    ## 10 Baltimore,MD   (Intercept)            3.27    5.19    2.07 
-    ## # ... with 201 more rows
+    ##  1 Albuquerque,NM (Intercept)            3.62    7.76    1.69 
+    ##  2 Albuquerque,NM victim_age             0.976   0.990   0.962
+    ##  3 Albuquerque,NM victim_racenon-white   0.738   1.21    0.449
+    ##  4 Albuquerque,NM victim_sexMale         1.58    2.78    0.894
+    ##  5 Atlanta,GA     (Intercept)            3.17    6.43    1.56 
+    ##  6 Atlanta,GA     victim_age             0.988   0.997   0.979
+    ##  7 Atlanta,GA     victim_racenon-white   0.753   1.31    0.432
+    ##  8 Atlanta,GA     victim_sexMale         0.990   1.44    0.679
+    ##  9 Baltimore,MD   (Intercept)            3.27    5.19    2.07 
+    ## 10 Baltimore,MD   victim_age             0.993   0.999   0.987
+    ## # ... with 178 more rows
+
+``` r
+allcity%>%
+  mutate(city_state = forcats::fct_reorder(city_state, city_OR))%>%
+  ggplot(aes(x=city_state,y=city_OR))+
+  geom_point()+
+  geom_errorbar(aes(ymin=lowerCI,ymax=upperCI))+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+![](Homework6_files/figure-markdown_github/unnamed-chunk-1-1.png)
 
 ``` r
 library(tidyverse)
@@ -367,29 +379,13 @@ summary(fit)
 data %>% 
   select(bwt,babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken)%>%
   add_residuals(fit) %>% 
-  add_predictions(fit)
+  add_predictions(fit)%>%
+  ggplot(aes(x=))
 ```
 
-    ## # A tibble: 4,342 x 14
-    ##      bwt babysex bhead blength delwt fincome gaweeks mheight mrace parity
-    ##    <int> <fct>   <int>   <int> <int>   <int>   <dbl>   <int> <fct>  <int>
-    ##  1  3629 2          34      51   177      35    39.9      63 1          3
-    ##  2  3062 1          34      48   156      65    25.9      65 2          0
-    ##  3  3345 2          36      50   148      85    39.9      64 1          0
-    ##  4  3062 1          34      52   157      55    40        64 1          0
-    ##  5  3374 2          34      52   156       5    41.6      66 1          0
-    ##  6  3374 1          33      52   129      55    40.7      66 1          0
-    ##  7  2523 2          33      46   126      96    40.3      72 2          0
-    ##  8  2778 2          33      49   140       5    37.4      62 1          0
-    ##  9  3515 1          36      52   146      85    40.3      61 1          0
-    ## 10  3459 1          33      50   169      75    40.7      64 2          0
-    ## # ... with 4,332 more rows, and 4 more variables: ppwt <int>,
-    ## #   smoken <dbl>, resid <dbl>, pred <dbl>
+![](Homework6_files/figure-markdown_github/problem2-1.png)
 
 ``` r
-fit1=lm(bwt~blength+gaweeks,data=data)
-fit2=lm(bwt~bhead+blength+babysex+bhead*blength+bhead*babysex+blength*babysex+bhead*babysex*blength,data=data)
-
 cv_df =
   crossv_mc(data, 100) %>% 
   mutate(train = map(train, as_tibble),
@@ -408,9 +404,6 @@ cv_df =
     ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
     ## may be misleading
 
-    ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
-    ## may be misleading
-
 ``` r
 cv_df
 ```
@@ -418,16 +411,16 @@ cv_df
     ## # A tibble: 100 x 9
     ##    train    test     .id   mod1  mod2  mod3  rmse_mod1 rmse_mod2 rmse_mod3
     ##    <list>   <list>   <chr> <lis> <lis> <lis>     <dbl>     <dbl>     <dbl>
-    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      273.      322.      288.
-    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      277.      328.      287.
-    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      270.      333.      284.
-    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      297.      376.      318.
-    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      263.      317.      279.
-    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      273.      308.      285.
-    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      285.      328.      290.
-    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      276.      330.      292.
-    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      276.      339.      293.
-    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      283.      339.      297.
+    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      277.      331.      291.
+    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      270.      345.      291.
+    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      276.      332.      287.
+    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      261.      325.      275.
+    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      273.      328.      289.
+    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      270.      331.      284.
+    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      278.      338.      292.
+    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      288.      359.      301.
+    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      262.      309.      278.
+    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      281.      334.      291.
     ## # ... with 90 more rows
 
 ``` r
@@ -439,6 +432,6 @@ cv_df %>%
   ggplot(aes(x = model, y = rmse)) + geom_violin()
 ```
 
-![](Homework6_files/figure-markdown_github/problem2-1.png)
+![](Homework6_files/figure-markdown_github/problem2-2.png)
 
--   The model building process I choose is stepwaise approaches, backward elimination, remove the variable with the greatest p-value one by one , and the predictors left are babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken.
+-   The model building process I choose is stepwaise approaches, backward elimination, remove the variable with the greatest p-value one by one , and the predictors left are babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken. From the rmse plot, we can see the first model is the one we want because it has lower rmse.

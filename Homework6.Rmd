@@ -11,6 +11,7 @@ data=data%>%
   mutate(city_state=str_c(city,state,sep=","))%>%
   mutate(ifsolved=ifelse(disposition=="Closed by arrest","solved","unsolved"))%>%
   filter(!(city_state%in%c("Dallas,TX","Phoenix,AZ","Kansas City,MO","Tulsa,AL")))%>%
+  filter(!(victim_sex=="Unknown"))%>%
   mutate(victim_age=as.numeric(victim_age))%>%
   mutate(victim_race=ifelse(victim_race=="White","white","non-white"))%>%
   mutate(victim_race=as.character(victim_race))%>%
@@ -39,6 +40,12 @@ allcity=data%>%
   mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))%>%
   select(city_state,term,city_OR,upperCI,lowerCI)
 allcity
+allcity%>%
+  mutate(city_state = forcats::fct_reorder(city_state, city_OR))%>%
+  ggplot(aes(x=city_state,y=city_OR))+
+  geom_point()+
+  geom_errorbar(aes(ymin=lowerCI,ymax=upperCI))+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
 
@@ -61,12 +68,12 @@ summary(fit)
 data %>% 
   select(bwt,babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken)%>%
   add_residuals(fit) %>% 
-  add_predictions(fit)
+  add_predictions(fit)%>%
+  ggplot(aes(x=))
 
 
 
-fit1=lm(bwt~blength+gaweeks,data=data)
-fit2=lm(bwt~bhead+blength+babysex+bhead*blength+bhead*babysex+blength*babysex+bhead*babysex*blength,data=data)
+
 
 cv_df =
   crossv_mc(data, 100) %>% 
