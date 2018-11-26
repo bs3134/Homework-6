@@ -403,9 +403,6 @@ data %>%
   gather(key = name, value = x, -bwt, -pred, -resid) %>%  
   ggplot(aes(x = x, y = bwt)) +  
   geom_segment(aes(xend = x, yend = pred), alpha = .2) +
-  geom_point(aes(color = resid)) +
-  scale_color_gradient2(low = "blue", mid = "white", high = "red") +
-  guides(color = FALSE) +
   geom_point(aes(y = pred), shape = 1) +
   facet_grid(~ name, scales = "free_x") + 
   theme_bw()
@@ -433,16 +430,16 @@ cv_df
     ## # A tibble: 100 x 9
     ##    train    test     .id   mod1  mod2  mod3  rmse_mod1 rmse_mod2 rmse_mod3
     ##    <list>   <list>   <chr> <lis> <lis> <lis>     <dbl>     <dbl>     <dbl>
-    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      288.      360.      308.
-    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      264.      321.      276.
-    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      277.      334.      296.
-    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      264.      328.      282.
-    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      264.      327.      279.
-    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      279.      350.      302.
-    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      264.      319.      282.
-    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      271.      327.      283.
-    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      272.      331.      294.
-    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      283.      345.      301.
+    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      290.      358.      305.
+    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      261.      311.      276.
+    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      267.      315.      285.
+    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      275.      317.      286.
+    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      269.      318.      282.
+    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      272.      325.      285.
+    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      275.      342.      291.
+    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      275.      337.      287.
+    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      270.      335.      285.
+    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      286.      364.      308.
     ## # ... with 90 more rows
 
 ``` r
