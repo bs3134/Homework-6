@@ -79,19 +79,31 @@ data_Bal=data%>%
   filter(city_state=="Baltimore,MD")
 model=glm(ifsolved ~ victim_age + victim_race + victim_sex, data = data_Bal, family = binomial())
 fit_logistic=broom::tidy(model)
-fit_logistic%>%
-  mutate(OR=exp(estimate))%>%
-  mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
-  mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))
+fit_logistic
 ```
 
-    ## # A tibble: 4 x 8
-    ##   term         estimate std.error statistic  p.value    OR upperCI lowerCI
-    ##   <chr>           <dbl>     <dbl>     <dbl>    <dbl> <dbl>   <dbl>   <dbl>
-    ## 1 (Intercept)   1.19      0.235        5.06 4.30e- 7 3.27    5.19    2.07 
-    ## 2 victim_age   -0.00699   0.00326     -2.14 3.22e- 2 0.993   0.999   0.987
-    ## 3 victim_race~ -0.820     0.175       -4.69 2.68e- 6 0.441   0.620   0.313
-    ## 4 victim_sexM~ -0.888     0.136       -6.53 6.80e-11 0.412   0.537   0.315
+    ## # A tibble: 4 x 5
+    ##   term                 estimate std.error statistic  p.value
+    ##   <chr>                   <dbl>     <dbl>     <dbl>    <dbl>
+    ## 1 (Intercept)           1.19      0.235        5.06 4.30e- 7
+    ## 2 victim_age           -0.00699   0.00326     -2.14 3.22e- 2
+    ## 3 victim_racenon-white -0.820     0.175       -4.69 2.68e- 6
+    ## 4 victim_sexMale       -0.888     0.136       -6.53 6.80e-11
+
+``` r
+fit_logistic%>%
+  mutate(OR=exp(estimate))%>%
+  
+  mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
+  mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))%>%
+  filter(term=="victim_racenon-white")%>%
+  select(term,OR,upperCI,lowerCI)
+```
+
+    ## # A tibble: 1 x 4
+    ##   term                    OR upperCI lowerCI
+    ##   <chr>                <dbl>   <dbl>   <dbl>
+    ## 1 victim_racenon-white 0.441   0.620   0.313
 
 ``` r
 allcity=data%>%
@@ -105,24 +117,61 @@ allcity=data%>%
   mutate(city_OR=exp(estimate))%>%
   mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
   mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))%>%
-  select(city_state,term,city_OR,upperCI,lowerCI)
-allcity
+  filter(term=="victim_racenon-white")%>%
+  select(city_state,city_OR,upperCI,lowerCI)
+ allcity%>%
+   knitr::kable(digits = 3)
 ```
 
-    ## # A tibble: 188 x 5
-    ##    city_state     term                 city_OR upperCI lowerCI
-    ##    <chr>          <chr>                  <dbl>   <dbl>   <dbl>
-    ##  1 Albuquerque,NM (Intercept)            3.62    7.76    1.69 
-    ##  2 Albuquerque,NM victim_age             0.976   0.990   0.962
-    ##  3 Albuquerque,NM victim_racenon-white   0.738   1.21    0.449
-    ##  4 Albuquerque,NM victim_sexMale         1.58    2.78    0.894
-    ##  5 Atlanta,GA     (Intercept)            3.17    6.43    1.56 
-    ##  6 Atlanta,GA     victim_age             0.988   0.997   0.979
-    ##  7 Atlanta,GA     victim_racenon-white   0.753   1.31    0.432
-    ##  8 Atlanta,GA     victim_sexMale         0.990   1.44    0.679
-    ##  9 Baltimore,MD   (Intercept)            3.27    5.19    2.07 
-    ## 10 Baltimore,MD   victim_age             0.993   0.999   0.987
-    ## # ... with 178 more rows
+| city\_state       |  city\_OR|  upperCI|  lowerCI|
+|:------------------|---------:|--------:|--------:|
+| Albuquerque,NM    |     0.738|    1.214|    0.449|
+| Atlanta,GA        |     0.753|    1.313|    0.432|
+| Baltimore,MD      |     0.441|    0.620|    0.313|
+| Baton Rouge,LA    |     0.668|    1.425|    0.313|
+| Birmingham,AL     |     1.039|    1.756|    0.615|
+| Boston,MA         |     0.127|    0.307|    0.052|
+| Buffalo,NY        |     0.390|    0.714|    0.213|
+| Charlotte,NC      |     0.558|    0.969|    0.321|
+| Chicago,IL        |     0.562|    0.733|    0.431|
+| Cincinnati,OH     |     0.318|    0.551|    0.184|
+| Columbus,OH       |     0.855|    1.152|    0.634|
+| Denver,CO         |     0.602|    1.009|    0.359|
+| Detroit,MI        |     0.651|    0.869|    0.488|
+| Durham,NC         |     1.003|    2.489|    0.404|
+| Fort Worth,TX     |     0.838|    1.266|    0.555|
+| Fresno,CA         |     0.448|    0.870|    0.231|
+| Houston,TX        |     0.873|    1.090|    0.699|
+| Indianapolis,IN   |     0.505|    0.667|    0.382|
+| Jacksonville,FL   |     0.658|    0.862|    0.502|
+| Las Vegas,NV      |     0.763|    0.982|    0.592|
+| Long Beach,CA     |     0.794|    1.626|    0.388|
+| Los Angeles,CA    |     0.666|    0.918|    0.483|
+| Louisville,KY     |     0.392|    0.593|    0.259|
+| Memphis,TN        |     0.782|    1.168|    0.524|
+| Miami,FL          |     0.577|    0.885|    0.376|
+| Milwaukee,wI      |     0.632|    0.991|    0.403|
+| Minneapolis,MN    |     0.646|    1.209|    0.345|
+| Nashville,TN      |     0.899|    1.236|    0.653|
+| New Orleans,LA    |     0.467|    0.738|    0.295|
+| New York,NY       |     0.531|    1.011|    0.279|
+| Oakland,CA        |     0.213|    0.435|    0.104|
+| Oklahoma City,OK  |     0.681|    0.971|    0.478|
+| Omaha,NE          |     0.169|    0.305|    0.094|
+| Philadelphia,PA   |     0.644|    0.852|    0.486|
+| Pittsburgh,PA     |     0.282|    0.493|    0.161|
+| Richmond,VA       |     0.447|    1.238|    0.162|
+| San Antonio,TX    |     0.689|    1.030|    0.461|
+| Sacramento,CA     |     0.781|    1.359|    0.449|
+| Savannah,GA       |     0.612|    1.302|    0.287|
+| San Bernardino,CA |     0.880|    1.972|    0.393|
+| San Diego,CA      |     0.483|    0.785|    0.298|
+| San Francisco,CA  |     0.458|    0.723|    0.290|
+| St. Louis,MO      |     0.577|    0.820|    0.406|
+| Stockton,CA       |     0.376|    0.719|    0.196|
+| Tampa,FL          |     1.159|    2.288|    0.587|
+| Tulsa,OK          |     0.602|    0.879|    0.413|
+| Washington,DC     |     0.514|    1.017|    0.260|
 
 ``` r
 allcity%>%
@@ -424,22 +473,31 @@ cv_df =
   mutate(rmse_mod1 = map2_dbl(mod1, test, ~rmse(model = .x, data = .y)),
          rmse_mod2 = map2_dbl(mod2, test, ~rmse(model = .x, data = .y)),
          rmse_mod3 = map2_dbl(mod3, test, ~rmse(model = .x, data = .y)))
+```
+
+    ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
+    ## may be misleading
+
+    ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
+    ## may be misleading
+
+``` r
 cv_df
 ```
 
     ## # A tibble: 100 x 9
     ##    train    test     .id   mod1  mod2  mod3  rmse_mod1 rmse_mod2 rmse_mod3
     ##    <list>   <list>   <chr> <lis> <lis> <lis>     <dbl>     <dbl>     <dbl>
-    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      290.      358.      305.
-    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      261.      311.      276.
-    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      267.      315.      285.
-    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      275.      317.      286.
-    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      269.      318.      282.
-    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      272.      325.      285.
-    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      275.      342.      291.
-    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      275.      337.      287.
-    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      270.      335.      285.
-    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      286.      364.      308.
+    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      268.      327.      285.
+    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      259.      324.      278.
+    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      267.      315.      283.
+    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      263.      320.      277.
+    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      262.      311.      278.
+    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      272.      336.      284.
+    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      263.      313.      276.
+    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      281.      327.      296.
+    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      276.      334.      289.
+    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      266.      331.      285.
     ## # ... with 90 more rows
 
 ``` r

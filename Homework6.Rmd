@@ -22,10 +22,14 @@ data_Bal=data%>%
   filter(city_state=="Baltimore,MD")
 model=glm(ifsolved ~ victim_age + victim_race + victim_sex, data = data_Bal, family = binomial())
 fit_logistic=broom::tidy(model)
+fit_logistic
 fit_logistic%>%
   mutate(OR=exp(estimate))%>%
+  
   mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
-  mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))
+  mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))%>%
+  filter(term=="victim_racenon-white")%>%
+  select(term,OR,upperCI,lowerCI)
 
 allcity=data%>%
   select(city_state,ifsolved,victim_age,victim_race,victim_sex)%>%
@@ -38,15 +42,17 @@ allcity=data%>%
   mutate(city_OR=exp(estimate))%>%
   mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
   mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))%>%
-  select(city_state,term,city_OR,upperCI,lowerCI)
-allcity
+  filter(term=="victim_racenon-white")%>%
+  select(city_state,city_OR,upperCI,lowerCI)
+ allcity%>%
+   knitr::kable(digits = 3)
+
 allcity%>%
   mutate(city_state = forcats::fct_reorder(city_state, city_OR))%>%
   ggplot(aes(x=city_state,y=city_OR))+
   geom_point()+
   geom_errorbar(aes(ymin=lowerCI,ymax=upperCI))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
 
 
 ```
