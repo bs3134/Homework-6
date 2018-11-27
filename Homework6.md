@@ -184,6 +184,8 @@ allcity%>%
 
 ![](Homework6_files/figure-markdown_github/unnamed-chunk-1-1.png)
 
+-   I ordered the graph by adjusted odds ratio, and found that Boston had the lowest odds ratio and Tampa had the highest. In most cities, the odds ratios are lower than 1, which means with other variables fixed, the odds of homicide among white people is lower than non-white people in most cities (except Birmingham and Tampa).In Birmingham and Tampa, the odds of homicide among white people is higher than non-white people.
+
 ``` r
 library(tidyverse)
 library(modelr)
@@ -462,39 +464,27 @@ cv_df =
   mutate(train = map(train, as_tibble),
          test = map(test, as_tibble))%>%
   mutate(mod1 = map(train, ~lm(bwt~babysex+bhead+blength+delwt+fincome+gaweeks+mheight+mrace+parity+ppwt+smoken, data = .x)),
-         mod2 = map(train, ~lm(bwt ~ blength+gaweeks, data = .x)),
+         mod2 = map(train, ~lm(bwt~blength+gaweeks, data = .x)),
          mod3 = map(train, ~lm(bwt~bhead+blength+babysex+bhead*blength+bhead*babysex+blength*babysex+bhead*babysex*blength,data=.x))) %>% 
   mutate(rmse_mod1 = map2_dbl(mod1, test, ~rmse(model = .x, data = .y)),
          rmse_mod2 = map2_dbl(mod2, test, ~rmse(model = .x, data = .y)),
          rmse_mod3 = map2_dbl(mod3, test, ~rmse(model = .x, data = .y)))
-```
-
-    ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
-    ## may be misleading
-
-    ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
-    ## may be misleading
-
-    ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
-    ## may be misleading
-
-``` r
 cv_df
 ```
 
     ## # A tibble: 100 x 9
     ##    train    test     .id   mod1  mod2  mod3  rmse_mod1 rmse_mod2 rmse_mod3
     ##    <list>   <list>   <chr> <lis> <lis> <lis>     <dbl>     <dbl>     <dbl>
-    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      268.      320.      278.
-    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      274.      318.      292.
-    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      287.      329.      298.
-    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      264.      312.      276.
-    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      275.      334.      289.
-    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      272.      342.      291.
-    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      293.      377.      312.
-    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      270.      323.      282.
-    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      276.      355.      293.
-    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      260.      308.      268.
+    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      277.      355.      293.
+    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      269.      317.      284.
+    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      271.      321.      281.
+    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      263.      325.      280.
+    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      259.      312.      276.
+    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      268.      327.      288.
+    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      286.      370.      309.
+    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      282.      362.      305.
+    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      269.      328.      287.
+    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      273.      326.      289.
     ## # ... with 90 more rows
 
 ``` r
