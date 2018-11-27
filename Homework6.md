@@ -447,18 +447,12 @@ data %>%
 ``` r
 data %>% 
   add_residuals(fit)%>%
-  
   add_predictions(fit)%>%
-  gather(key = name, value = x, -bwt, -pred, -resid) %>%  
-  ggplot(aes(x = x, y = bwt)) +  
-  geom_segment(aes(xend = x, yend = pred), alpha = .2) +
-  geom_point(aes(y = pred), shape = 1) +
-  facet_grid(~ name, scales = "free_x") + 
-  theme_bw()
+  ggplot(aes(x=pred,y=resid))+
+  geom_point()+geom_smooth()
 ```
 
-    ## Warning: attributes are not identical across measure variables;
-    ## they will be dropped
+    ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
 
 ![](Homework6_files/figure-markdown_github/problem2-1.png)
 
@@ -481,6 +475,9 @@ cv_df =
     ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
     ## may be misleading
 
+    ## Warning in predict.lm(model, data): prediction from a rank-deficient fit
+    ## may be misleading
+
 ``` r
 cv_df
 ```
@@ -488,16 +485,16 @@ cv_df
     ## # A tibble: 100 x 9
     ##    train    test     .id   mod1  mod2  mod3  rmse_mod1 rmse_mod2 rmse_mod3
     ##    <list>   <list>   <chr> <lis> <lis> <lis>     <dbl>     <dbl>     <dbl>
-    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      268.      327.      285.
-    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      259.      324.      278.
-    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      267.      315.      283.
-    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      263.      320.      277.
-    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      262.      311.      278.
-    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      272.      336.      284.
-    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      263.      313.      276.
-    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      281.      327.      296.
-    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      276.      334.      289.
-    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      266.      331.      285.
+    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      268.      320.      278.
+    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      274.      318.      292.
+    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      287.      329.      298.
+    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      264.      312.      276.
+    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      275.      334.      289.
+    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      272.      342.      291.
+    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      293.      377.      312.
+    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      270.      323.      282.
+    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      276.      355.      293.
+    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      260.      308.      268.
     ## # ... with 90 more rows
 
 ``` r

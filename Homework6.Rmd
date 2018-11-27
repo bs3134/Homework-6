@@ -79,14 +79,9 @@ data %>%
 
 data %>% 
   add_residuals(fit)%>%
-  
   add_predictions(fit)%>%
-  gather(key = name, value = x, -bwt, -pred, -resid) %>%  
-  ggplot(aes(x = x, y = bwt)) +  
-  geom_segment(aes(xend = x, yend = pred), alpha = .2) +
-  geom_point(aes(y = pred), shape = 1) +
-  facet_grid(~ name, scales = "free_x") + 
-  theme_bw()
+  ggplot(aes(x=pred,y=resid))+
+  geom_point()+geom_smooth()
   
 
 
