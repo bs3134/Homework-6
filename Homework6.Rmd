@@ -6,44 +6,44 @@ output: github_document
 
 ```{r}
 library(tidyverse)
-data=read_csv(file="C:/Users/lenovo/Desktop/p8105/data_import_examples/homicide-data.csv")
-data=data%>%
-  mutate(city_state=str_c(city,state,sep=","))%>%
-  mutate(ifsolved=ifelse(disposition=="Closed by arrest","solved","unsolved"))%>%
-  filter(!(city_state%in%c("Dallas,TX","Phoenix,AZ","Kansas City,MO","Tulsa,AL")))%>%
-  filter(!(victim_sex=="Unknown"))%>%
-  mutate(victim_age=as.numeric(victim_age))%>%
-  mutate(victim_race=ifelse(victim_race=="White","white","non-white"))%>%
-  mutate(victim_race=as.character(victim_race))%>%
-  mutate(victim_race=fct_relevel(victim_race,"white"))%>%
-  mutate(ifsolved=as.numeric(ifsolved=="solved"))
+data = read_csv(file = "./data/homicide-data.csv")
+data = data%>%
+  mutate(city_state = str_c(city,state,sep=","))%>%
+  mutate(ifsolved = ifelse(disposition == "Closed by arrest","solved","unsolved"))%>%
+  filter(!(city_state%in%c("Dallas,TX" , "Phoenix,AZ" , "Kansas City,MO" , "Tulsa,AL")))%>%
+  filter(!(victim_sex == "Unknown"))%>%
+  mutate(victim_age = as.numeric(victim_age))%>%
+  mutate(victim_race = ifelse(victim_race == "White", "white", "non-white"))%>%
+  mutate(victim_race = as.character(victim_race))%>%
+  mutate(victim_race = fct_relevel(victim_race,"white"))%>%
+  mutate(ifsolved = as.numeric(ifsolved == "solved"))
 data  
-data_Bal=data%>%
-  filter(city_state=="Baltimore,MD")
+data_Bal = data%>%
+  filter(city_state == "Baltimore,MD")
 model=glm(ifsolved ~ victim_age + victim_race + victim_sex, data = data_Bal, family = binomial())
-fit_logistic=broom::tidy(model)
+fit_logistic = broom::tidy(model)
 fit_logistic
 fit_logistic%>%
-  mutate(OR=exp(estimate))%>%
+  mutate(OR = exp(estimate))%>%
   
-  mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
-  mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))%>%
-  filter(term=="victim_racenon-white")%>%
-  select(term,OR,upperCI,lowerCI)
+  mutate(upperCI = exp(estimate + qnorm(0.975) * std.error))%>%
+  mutate(lowerCI = exp(estimate - qnorm(0.975) * std.error))%>%
+  filter(term == "victim_racenon-white")%>%
+  select(term, OR, upperCI, lowerCI)
 
 allcity=data%>%
-  select(city_state,ifsolved,victim_age,victim_race,victim_sex)%>%
+  select(city_state, ifsolved, victim_age, victim_race, victim_sex)%>%
   group_by(city_state)%>%
   nest()%>%
-  mutate(newmodel=map(data,~glm(ifsolved ~ victim_age + victim_race + victim_sex, data= .x,family = binomial())))%>%
-  mutate(result=map(newmodel,broom::tidy))%>%
-  select(city_state,result)%>%
+  mutate(newmodel = map(data, ~ glm(ifsolved ~ victim_age + victim_race + victim_sex, data= .x,family = binomial())))%>%
+  mutate(result = map(newmodel, broom::tidy))%>%
+  select(city_state, result)%>%
   unnest()%>%
-  mutate(city_OR=exp(estimate))%>%
-  mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
-  mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))%>%
-  filter(term=="victim_racenon-white")%>%
-  select(city_state,city_OR,upperCI,lowerCI)
+  mutate(city_OR = exp(estimate))%>%
+  mutate(upperCI = exp(estimate + qnorm(0.975) * std.error))%>%
+  mutate(lowerCI = exp(estimate - qnorm(0.975) * std.error))%>%
+  filter(term == "victim_racenon-white")%>%
+  select(city_state, city_OR, upperCI, lowerCI)
  allcity%>%
    knitr::kable(digits = 3)
 
@@ -51,7 +51,7 @@ allcity%>%
   mutate(city_state = forcats::fct_reorder(city_state, city_OR))%>%
   ggplot(aes(x=city_state,y=city_OR))+
   geom_point()+
-  geom_errorbar(aes(ymin=lowerCI,ymax=upperCI))+
+  geom_errorbar(aes(ymin = lowerCI,ymax = upperCI))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
@@ -63,18 +63,18 @@ allcity%>%
 ```{r problem2}
 library(tidyverse)
 library(modelr)
-data=read_csv("C:/Users/lenovo/Desktop/p8105/data_import_examples/birthweight.csv")%>%
-  mutate(babysex=as.factor(babysex))%>%
-  mutate(frace=as.factor(frace))%>%
-  mutate(malform=as.factor(malform))%>%
-  mutate(mrace=as.factor(mrace))
-data=na.omit(data)
+data=read_csv("./data/birthweight.csv")%>%
+  mutate(babysex = as.factor(babysex))%>%
+  mutate(frace = as.factor(frace))%>%
+  mutate(malform = as.factor(malform))%>%
+  mutate(mrace = as.factor(mrace))
+data = na.omit(data)
 data
-step(lm(bwt~babysex+bhead+blength+delwt+fincome+frace+gaweeks+malform+menarche+mheight+momage+mrace+parity+pnumlbw+pnumsga+ppbmi+ppwt+smoken+wtgain,data=data),direction="backward")
-fit=lm(bwt~babysex+bhead+blength+delwt+fincome+gaweeks+mheight+mrace+parity+ppwt+smoken, data = data)
+step(lm(bwt ~ babysex + bhead + blength + delwt + fincome + frace + gaweeks + malform + menarche + mheight + momage + mrace + parity + pnumlbw + pnumsga + ppbmi + ppwt + smoken + wtgain , data = data),direction = "backward")
+fit = lm(bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken, data = data)
 summary(fit)
 data %>% 
-  select(bwt,babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken)
+  select(bwt, babysex, bhead, blength, delwt, fincome, gaweeks, mheight, mrace, parity, ppwt, smoken)
 
   
  
@@ -82,8 +82,8 @@ data %>%
 data %>% 
   add_residuals(fit)%>%
   add_predictions(fit)%>%
-  ggplot(aes(x=pred,y=resid))+
-  geom_point()+geom_smooth()
+  ggplot(aes(x = pred,y = resid))+
+  geom_point() + geom_smooth()
   
 
 

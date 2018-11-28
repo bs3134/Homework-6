@@ -18,7 +18,7 @@ library(tidyverse)
     ## x dplyr::lag()    masks stats::lag()
 
 ``` r
-data=read_csv(file="C:/Users/lenovo/Desktop/p8105/data_import_examples/homicide-data.csv")
+data = read_csv(file = "./data/homicide-data.csv")
 ```
 
     ## Parsed with column specification:
@@ -38,16 +38,16 @@ data=read_csv(file="C:/Users/lenovo/Desktop/p8105/data_import_examples/homicide-
     ## )
 
 ``` r
-data=data%>%
-  mutate(city_state=str_c(city,state,sep=","))%>%
-  mutate(ifsolved=ifelse(disposition=="Closed by arrest","solved","unsolved"))%>%
-  filter(!(city_state%in%c("Dallas,TX","Phoenix,AZ","Kansas City,MO","Tulsa,AL")))%>%
-  filter(!(victim_sex=="Unknown"))%>%
-  mutate(victim_age=as.numeric(victim_age))%>%
-  mutate(victim_race=ifelse(victim_race=="White","white","non-white"))%>%
-  mutate(victim_race=as.character(victim_race))%>%
-  mutate(victim_race=fct_relevel(victim_race,"white"))%>%
-  mutate(ifsolved=as.numeric(ifsolved=="solved"))
+data = data%>%
+  mutate(city_state = str_c(city,state,sep=","))%>%
+  mutate(ifsolved = ifelse(disposition == "Closed by arrest","solved","unsolved"))%>%
+  filter(!(city_state%in%c("Dallas,TX" , "Phoenix,AZ" , "Kansas City,MO" , "Tulsa,AL")))%>%
+  filter(!(victim_sex == "Unknown"))%>%
+  mutate(victim_age = as.numeric(victim_age))%>%
+  mutate(victim_race = ifelse(victim_race == "White", "white", "non-white"))%>%
+  mutate(victim_race = as.character(victim_race))%>%
+  mutate(victim_race = fct_relevel(victim_race,"white"))%>%
+  mutate(ifsolved = as.numeric(ifsolved == "solved"))
 ```
 
     ## Warning in evalq(as.numeric(victim_age), <environment>): NAs introduced by
@@ -75,10 +75,10 @@ data
     ## #   city_state <chr>, ifsolved <dbl>
 
 ``` r
-data_Bal=data%>%
-  filter(city_state=="Baltimore,MD")
+data_Bal = data%>%
+  filter(city_state == "Baltimore,MD")
 model=glm(ifsolved ~ victim_age + victim_race + victim_sex, data = data_Bal, family = binomial())
-fit_logistic=broom::tidy(model)
+fit_logistic = broom::tidy(model)
 fit_logistic
 ```
 
@@ -92,12 +92,12 @@ fit_logistic
 
 ``` r
 fit_logistic%>%
-  mutate(OR=exp(estimate))%>%
+  mutate(OR = exp(estimate))%>%
   
-  mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
-  mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))%>%
-  filter(term=="victim_racenon-white")%>%
-  select(term,OR,upperCI,lowerCI)
+  mutate(upperCI = exp(estimate + qnorm(0.975) * std.error))%>%
+  mutate(lowerCI = exp(estimate - qnorm(0.975) * std.error))%>%
+  filter(term == "victim_racenon-white")%>%
+  select(term, OR, upperCI, lowerCI)
 ```
 
     ## # A tibble: 1 x 4
@@ -107,18 +107,18 @@ fit_logistic%>%
 
 ``` r
 allcity=data%>%
-  select(city_state,ifsolved,victim_age,victim_race,victim_sex)%>%
+  select(city_state, ifsolved, victim_age, victim_race, victim_sex)%>%
   group_by(city_state)%>%
   nest()%>%
-  mutate(newmodel=map(data,~glm(ifsolved ~ victim_age + victim_race + victim_sex, data= .x,family = binomial())))%>%
-  mutate(result=map(newmodel,broom::tidy))%>%
-  select(city_state,result)%>%
+  mutate(newmodel = map(data, ~ glm(ifsolved ~ victim_age + victim_race + victim_sex, data= .x,family = binomial())))%>%
+  mutate(result = map(newmodel, broom::tidy))%>%
+  select(city_state, result)%>%
   unnest()%>%
-  mutate(city_OR=exp(estimate))%>%
-  mutate(upperCI=exp(estimate+qnorm(0.975)*std.error))%>%
-  mutate(lowerCI=exp(estimate-qnorm(0.975)*std.error))%>%
-  filter(term=="victim_racenon-white")%>%
-  select(city_state,city_OR,upperCI,lowerCI)
+  mutate(city_OR = exp(estimate))%>%
+  mutate(upperCI = exp(estimate + qnorm(0.975) * std.error))%>%
+  mutate(lowerCI = exp(estimate - qnorm(0.975) * std.error))%>%
+  filter(term == "victim_racenon-white")%>%
+  select(city_state, city_OR, upperCI, lowerCI)
  allcity%>%
    knitr::kable(digits = 3)
 ```
@@ -178,7 +178,7 @@ allcity%>%
   mutate(city_state = forcats::fct_reorder(city_state, city_OR))%>%
   ggplot(aes(x=city_state,y=city_OR))+
   geom_point()+
-  geom_errorbar(aes(ymin=lowerCI,ymax=upperCI))+
+  geom_errorbar(aes(ymin = lowerCI,ymax = upperCI))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
@@ -189,11 +189,11 @@ allcity%>%
 ``` r
 library(tidyverse)
 library(modelr)
-data=read_csv("C:/Users/lenovo/Desktop/p8105/data_import_examples/birthweight.csv")%>%
-  mutate(babysex=as.factor(babysex))%>%
-  mutate(frace=as.factor(frace))%>%
-  mutate(malform=as.factor(malform))%>%
-  mutate(mrace=as.factor(mrace))
+data=read_csv("./data/birthweight.csv")%>%
+  mutate(babysex = as.factor(babysex))%>%
+  mutate(frace = as.factor(frace))%>%
+  mutate(malform = as.factor(malform))%>%
+  mutate(mrace = as.factor(mrace))
 ```
 
     ## Parsed with column specification:
@@ -207,7 +207,7 @@ data=read_csv("C:/Users/lenovo/Desktop/p8105/data_import_examples/birthweight.cs
     ## See spec(...) for full column specifications.
 
 ``` r
-data=na.omit(data)
+data = na.omit(data)
 data
 ```
 
@@ -229,7 +229,7 @@ data
     ## #   ppbmi <dbl>, ppwt <int>, smoken <dbl>, wtgain <int>
 
 ``` r
-step(lm(bwt~babysex+bhead+blength+delwt+fincome+frace+gaweeks+malform+menarche+mheight+momage+mrace+parity+pnumlbw+pnumsga+ppbmi+ppwt+smoken+wtgain,data=data),direction="backward")
+step(lm(bwt ~ babysex + bhead + blength + delwt + fincome + frace + gaweeks + malform + menarche + mheight + momage + mrace + parity + pnumlbw + pnumsga + ppbmi + ppwt + smoken + wtgain , data = data),direction = "backward")
 ```
 
     ## Start:  AIC=48717.83
@@ -390,7 +390,7 @@ step(lm(bwt~babysex+bhead+blength+delwt+fincome+frace+gaweeks+malform+menarche+m
     ##    -100.678       96.305       -2.676       -4.843
 
 ``` r
-fit=lm(bwt~babysex+bhead+blength+delwt+fincome+gaweeks+mheight+mrace+parity+ppwt+smoken, data = data)
+fit = lm(bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken, data = data)
 summary(fit)
 ```
 
@@ -428,7 +428,7 @@ summary(fit)
 
 ``` r
 data %>% 
-  select(bwt,babysex,bhead,blength,delwt,fincome,gaweeks,mheight,mrace,parity,ppwt,smoken)
+  select(bwt, babysex, bhead, blength, delwt, fincome, gaweeks, mheight, mrace, parity, ppwt, smoken)
 ```
 
     ## # A tibble: 4,342 x 12
@@ -450,8 +450,8 @@ data %>%
 data %>% 
   add_residuals(fit)%>%
   add_predictions(fit)%>%
-  ggplot(aes(x=pred,y=resid))+
-  geom_point()+geom_smooth()
+  ggplot(aes(x = pred,y = resid))+
+  geom_point() + geom_smooth()
 ```
 
     ## `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
@@ -475,16 +475,16 @@ cv_df
     ## # A tibble: 100 x 9
     ##    train    test     .id   mod1  mod2  mod3  rmse_mod1 rmse_mod2 rmse_mod3
     ##    <list>   <list>   <chr> <lis> <lis> <lis>     <dbl>     <dbl>     <dbl>
-    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      277.      355.      293.
-    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      269.      317.      284.
-    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      271.      321.      281.
-    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      263.      325.      280.
-    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      259.      312.      276.
-    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      268.      327.      288.
-    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      286.      370.      309.
-    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      282.      362.      305.
-    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      269.      328.      287.
-    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      273.      326.      289.
+    ##  1 <tibble~ <tibble~ 001   <S3:~ <S3:~ <S3:~      266.      318.      275.
+    ##  2 <tibble~ <tibble~ 002   <S3:~ <S3:~ <S3:~      267.      321.      273.
+    ##  3 <tibble~ <tibble~ 003   <S3:~ <S3:~ <S3:~      270.      328.      286.
+    ##  4 <tibble~ <tibble~ 004   <S3:~ <S3:~ <S3:~      272.      327.      286.
+    ##  5 <tibble~ <tibble~ 005   <S3:~ <S3:~ <S3:~      268.      309.      283.
+    ##  6 <tibble~ <tibble~ 006   <S3:~ <S3:~ <S3:~      284.      346.      302.
+    ##  7 <tibble~ <tibble~ 007   <S3:~ <S3:~ <S3:~      268.      332.      289.
+    ##  8 <tibble~ <tibble~ 008   <S3:~ <S3:~ <S3:~      259.      319.      278.
+    ##  9 <tibble~ <tibble~ 009   <S3:~ <S3:~ <S3:~      266.      323.      287.
+    ## 10 <tibble~ <tibble~ 010   <S3:~ <S3:~ <S3:~      254.      309.      266.
     ## # ... with 90 more rows
 
 ``` r
